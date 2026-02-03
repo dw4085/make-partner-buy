@@ -5,8 +5,10 @@ import {
   SCENARIO_PARSING_PROMPT,
   HINT_GENERATION_PROMPT,
   ANALYSIS_PROMPT,
-  FEEDBACK_PROMPT
+  FEEDBACK_PROMPT,
+  INPUT_HINTS_PROMPT
 } from '../prompts';
+import { INPUT_METADATA } from '@/lib/inputMetadata';
 
 const openai = createOpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -130,5 +132,44 @@ export async function provideFeedback(
   } catch (e) {
     console.error('Failed to parse feedback JSON:', text);
     throw new Error('Failed to parse feedback response');
+  }
+}
+
+export async function generateInputHints(
+  framework: string,
+  scenario: Scenario
+): Promise<Record<string, string>> {
+  const inputsMeta = INPUT_METADATA[framework];
+  if (!inputsMeta) {
+    throw new Error(`Unknown framework: ${framework}`);
+  }
+
+  const inputsDescription = Object.entries(inputsMeta)
+    .map(([id, meta]) => `- ${id}: "${meta.label}" - ${meta.description}\n  Guidance: ${meta.hintGuidance}`)
+    .join('\n');
+
+  const scenarioContext = {
+    title: scenario.title,
+    summary: scenario.summary,
+    context: scenario.context,
+    keyFactors: scenario.keyFactors,
+  };
+
+  const prompt = INPUT_HINTS_PROMPT
+    .replace('{framework}', framework)
+    .replace('{scenario}', JSON.stringify(scenarioContext, null, 2))
+    .replace('{inputsMetadata}', inputsDescription);
+
+  const { text } = await generateText({
+    model: openai('gpt-4o'),
+    prompt,
+  });
+
+  try {
+    const jsonStr = extractJSON(text);
+    return JSON.parse(jsonStr);
+  } catch (e) {
+    console.error('Failed to parse input hints JSON:', text);
+    throw new Error('Failed to parse input hints response');
   }
 }

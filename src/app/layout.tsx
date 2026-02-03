@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { DM_Sans, Libre_Baskerville } from "next/font/google";
 import { SessionProvider } from "@/context/SessionContext";
+import { HintsProvider } from "@/context/HintsContext";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 
@@ -45,13 +46,15 @@ export default function RootLayout({
           Skip to main content
         </a>
 
-        <SessionProvider>
-          <TooltipProvider delayDuration={300}>
-            <div className="flex flex-col min-h-screen">
-              {children}
-            </div>
-          </TooltipProvider>
-        </SessionProvider>
+        <HintsProvider>
+          <SessionProvider>
+            <TooltipProvider delayDuration={300}>
+              <div className="flex flex-col min-h-screen">
+                {children}
+              </div>
+            </TooltipProvider>
+          </SessionProvider>
+        </HintsProvider>
       </body>
     </html>
   );

@@ -1,13 +1,12 @@
 'use client';
 
-import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Lightbulb, Loader2 } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useSession } from '@/context/SessionContext';
+import { InputHint } from '@/components/ui/InputHint';
 import { ANIMATION } from '@/lib/constants';
 
 interface Props {
@@ -16,41 +15,8 @@ interface Props {
 
 export function BargainingFramework({ onComplete }: Props) {
   const { state, updateFramework, completeFramework } = useSession();
-  const [showHint, setShowHint] = useState(false);
-  const [hint, setHint] = useState<string | null>(null);
-  const [loadingHint, setLoadingHint] = useState(false);
 
   const { supplierPower, buyerAlternatives, urgency } = state.frameworks.bargaining;
-
-  const getHint = async () => {
-    if (hint) {
-      setShowHint(!showHint);
-      return;
-    }
-
-    setLoadingHint(true);
-    try {
-      const response = await fetch('/api/hint', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          framework: 'bargaining',
-          scenario: state.scenario,
-          inputs: state.frameworks,
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setHint(data.hint);
-        setShowHint(true);
-      }
-    } catch (error) {
-      console.error('Failed to get hint:', error);
-    } finally {
-      setLoadingHint(false);
-    }
-  };
 
   const handleComplete = () => {
     completeFramework('bargaining');
@@ -120,6 +86,7 @@ export function BargainingFramework({ onComplete }: Props) {
               <span>Many suppliers available</span>
               <span>Few dominant suppliers</span>
             </div>
+            <InputHint framework="bargaining" inputId="supplierPower" />
           </div>
 
           {/* Buyer Alternatives */}
@@ -143,6 +110,7 @@ export function BargainingFramework({ onComplete }: Props) {
               <span>No real alternatives</span>
               <span>Many viable options</span>
             </div>
+            <InputHint framework="bargaining" inputId="buyerAlternatives" />
           </div>
 
           {/* Urgency */}
@@ -166,6 +134,7 @@ export function BargainingFramework({ onComplete }: Props) {
               <span>Can wait / Flexible timeline</span>
               <span>Urgent / Immediate need</span>
             </div>
+            <InputHint framework="bargaining" inputId="urgency" />
           </div>
 
           {/* Bargaining Position Visual */}
@@ -210,36 +179,6 @@ export function BargainingFramework({ onComplete }: Props) {
               <strong>Insight:</strong> {positionInfo.text}
             </p>
           </div>
-
-          {/* Hint toggle */}
-          <Collapsible open={showHint} onOpenChange={setShowHint}>
-            <CollapsibleTrigger asChild>
-              <Button
-                variant="ghost"
-                onClick={getHint}
-                disabled={loadingHint}
-                className="text-primary hover:text-primary/80"
-              >
-                {loadingHint ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Lightbulb className="mr-2 h-4 w-4" />
-                )}
-                {showHint ? 'Hide Hint' : 'Need a Hint?'}
-              </Button>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              {hint && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  className="bg-blue-50 rounded-lg p-4 mt-2"
-                >
-                  <p className="text-sm text-[#1E3A5F] whitespace-pre-line">{hint}</p>
-                </motion.div>
-              )}
-            </CollapsibleContent>
-          </Collapsible>
 
           {/* Complete button */}
           <Button onClick={handleComplete} className="w-full py-6" size="lg">

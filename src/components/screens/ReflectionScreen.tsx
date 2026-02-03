@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Download, Share2, RefreshCw, Loader2 } from 'lucide-react';
+import { Download, Share2, RefreshCw, Loader2, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Header } from '@/components/layout/Header';
@@ -127,6 +127,53 @@ Columbia Business School · Technology Strategy
     if (window.confirm('Start a new analysis? Your current results will be cleared.')) {
       resetSession();
     }
+  };
+
+  const handleEmailShare = () => {
+    const scenarioTitle = state.scenario?.title || 'Make-Buy-Partner Analysis';
+    const initialDecision = stance?.decision?.toUpperCase() || 'N/A';
+    const finalDecision = analysis?.primaryRecommendation?.toUpperCase() || 'N/A';
+
+    // Build framework results summary (keep it concise for mailto limits)
+    const frameworkSummary = analysis?.frameworkResults
+      .map(r => `• ${r.framework}: ${r.recommendation.toUpperCase()} (${r.confidence}%)`)
+      .join('\n') || '';
+
+    // Build weighted results
+    const weightedSummary = analysis ?
+      `Make: ${analysis.weightedResult.make}% | Buy: ${analysis.weightedResult.buy}% | Partner: ${analysis.weightedResult.partner}%` : '';
+
+    // Build the email body (keeping under ~2000 chars for compatibility)
+    const emailBody = `
+MAKE-BUY-PARTNER ANALYSIS
+========================
+
+SCENARIO: ${scenarioTitle}
+
+MY INITIAL INSTINCT: ${initialDecision}
+Reasoning: "${stance?.reasoning || 'N/A'}"
+
+FRAMEWORK ANALYSIS:
+${frameworkSummary}
+
+WEIGHTED RESULTS:
+${weightedSummary}
+
+RECOMMENDATION: ${finalDecision}
+
+${analysis?.primaryRecommendation !== stance?.decision
+  ? '→ The systematic analysis suggested a different approach than my initial instinct.'
+  : '→ My instinct aligned with the systematic analysis!'}
+
+---
+Generated with Make·Buy·Partner Analysis Tool
+Columbia Business School | Technology Strategy | Prof. Dan Wang
+    `.trim();
+
+    const subject = encodeURIComponent(`Make-Buy-Partner Analysis: ${scenarioTitle}`);
+    const body = encodeURIComponent(emailBody);
+
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
   };
 
   const getFeedbackIcon = (type: FeedbackItem['type']) => {
@@ -322,14 +369,14 @@ Columbia Business School · Technology Strategy
                 )}
 
                 {/* Action buttons */}
-                <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4">
                   <Button
                     variant="outline"
                     onClick={handleNewAnalysis}
                     className="flex-1"
                   >
                     <RefreshCw className="mr-2 h-4 w-4" />
-                    Try Another Scenario
+                    New Analysis
                   </Button>
                   <Button
                     variant="outline"
@@ -337,14 +384,22 @@ Columbia Business School · Technology Strategy
                     className="flex-1"
                   >
                     <Share2 className="mr-2 h-4 w-4" />
-                    Share Results
+                    Share
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={handleEmailShare}
+                    className="flex-1"
+                  >
+                    <Mail className="mr-2 h-4 w-4" />
+                    Email
                   </Button>
                   <Button
                     onClick={handleDownload}
                     className="flex-1"
                   >
                     <Download className="mr-2 h-4 w-4" />
-                    Download Summary
+                    Download
                   </Button>
                 </div>
               </CardContent>

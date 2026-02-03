@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Header } from '@/components/layout/Header';
 import { ProgressBar } from '@/components/layout/ProgressBar';
 import { useSession } from '@/context/SessionContext';
+import { useHints } from '@/context/HintsContext';
 import { FRAMEWORKS, ANIMATION, MIN_FRAMEWORKS_REQUIRED } from '@/lib/constants';
 
 // Framework components
@@ -31,7 +32,15 @@ const FRAMEWORK_COMPONENTS: Record<FrameworkKey, React.ComponentType<{ onComplet
 
 export function FrameworksScreen() {
   const { state, canProceedToResults, setStep } = useSession();
+  const { generateAllHints } = useHints();
   const [activeFramework, setActiveFramework] = useState<FrameworkKey | null>(null);
+
+  // Pre-generate all input hints when entering the frameworks screen
+  useEffect(() => {
+    if (state.scenario) {
+      generateAllHints(state.scenario);
+    }
+  }, [state.scenario, generateAllHints]);
 
   const handleFrameworkComplete = () => {
     setActiveFramework(null);

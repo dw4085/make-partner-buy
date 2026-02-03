@@ -132,3 +132,29 @@ export interface A11yProps {
   role?: string;
   tabIndex?: number;
 }
+
+// Input hints types
+export type FrameworkId = 'competition' | 'technology' | 'transactionCost' | 'holdUpRisk' | 'bargaining' | 'additional';
+
+export interface InputHintState {
+  hint: string | null;
+  loading: boolean;
+  error: string | null;
+}
+
+export type FrameworkHints = Record<string, InputHintState>;
+
+export interface HintsState {
+  competition: FrameworkHints;
+  technology: FrameworkHints;
+  transactionCost: FrameworkHints;
+  holdUpRisk: FrameworkHints;
+  bargaining: FrameworkHints;
+  additional: FrameworkHints;
+  generationTriggered: boolean;
+}
+
+export interface InputHintsResponse {
+  framework: FrameworkId;
+  hints: Record<string, string>;
+}

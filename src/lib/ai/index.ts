@@ -56,5 +56,13 @@ export async function provideFeedback(
   return provider.provideFeedback(scenario, stance, analysis);
 }
 
+export async function generateInputHints(
+  framework: string,
+  scenario: Scenario
+): Promise<Record<string, string>> {
+  const provider = getProvider();
+  return provider.generateInputHints(framework, scenario);
+}
+
 // Re-export the example scenario
 export { RIVIAN_EXAMPLE_SCENARIO } from './prompts';

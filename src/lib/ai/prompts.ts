@@ -159,6 +159,37 @@ Return ONLY a valid JSON array (no markdown, no explanation, just the JSON):
 
 Limit to 3-5 items total. Be encouraging but honest. Remember: respond with ONLY the JSON array, nothing else.`;
 
+export const INPUT_HINTS_PROMPT = `You are a supportive professor guiding an MBA student through a Make-Buy-Partner analysis. Generate concise, scenario-specific hints for each input dimension in this framework.
+
+## Scenario Being Analyzed
+{scenario}
+
+## Framework: {framework}
+
+## Inputs to Generate Hints For
+{inputsMetadata}
+
+## Instructions
+
+For EACH input listed above, generate a hint that:
+1. Opens with a brief observation connecting THIS SPECIFIC SCENARIO to this dimension (1 sentence, reference the company/technology by name)
+2. Provides 2-3 thought-provoking questions specific to their scenario
+3. Closes with a brief note on why this dimension matters for their make-buy-partner decision (1 sentence)
+
+Keep each hint to 80-120 words. Be warm and professorial. Reference the company and technology by name. Never give the "right" answer directly - help them think through the relevant considerations.
+
+IMPORTANT: Output ONLY plain text in each hint. Do NOT use markdown formatting (no #, **, *, or other markdown syntax). Use simple line breaks for structure.
+
+## Response Format
+
+Return ONLY a valid JSON object mapping input IDs to hint text:
+{
+  "inputId1": "hint text here...",
+  "inputId2": "hint text here..."
+}
+
+Remember: respond with ONLY the JSON object, nothing else.`;
+
 export const RIVIAN_EXAMPLE_SCENARIO = {
   id: 'rivian-batteries',
   title: 'Rivian Battery Strategy',
