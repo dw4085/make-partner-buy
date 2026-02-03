@@ -1,5 +1,58 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+// Maximum file size: 10MB
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+
+// Validate URL to prevent SSRF attacks
+function isValidExternalUrl(urlString: string): { valid: boolean; error?: string } {
+  try {
+    const url = new URL(urlString);
+
+    // Only allow http/https protocols
+    if (!['http:', 'https:'].includes(url.protocol)) {
+      return { valid: false, error: 'Only HTTP and HTTPS URLs are allowed' };
+    }
+
+    // Block localhost and internal IPs
+    const hostname = url.hostname.toLowerCase();
+
+    // Block localhost variations
+    if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1') {
+      return { valid: false, error: 'Cannot fetch from localhost' };
+    }
+
+    // Block private IP ranges
+    const ipPatterns = [
+      /^10\./,                     // 10.0.0.0/8
+      /^172\.(1[6-9]|2[0-9]|3[01])\./, // 172.16.0.0/12
+      /^192\.168\./,               // 192.168.0.0/16
+      /^169\.254\./,               // Link-local
+      /^0\./,                      // 0.0.0.0/8
+    ];
+
+    for (const pattern of ipPatterns) {
+      if (pattern.test(hostname)) {
+        return { valid: false, error: 'Cannot fetch from internal network addresses' };
+      }
+    }
+
+    // Block common internal hostnames
+    if (
+      hostname.endsWith('.local') ||
+      hostname.endsWith('.internal') ||
+      hostname.endsWith('.localhost') ||
+      hostname === 'metadata.google.internal' ||
+      hostname === 'metadata'
+    ) {
+      return { valid: false, error: 'Cannot fetch from internal hostnames' };
+    }
+
+    return { valid: true };
+  } catch {
+    return { valid: false, error: 'Invalid URL format' };
+  }
+}
+
 // Polyfill DOMMatrix for pdf.js in Node.js environment
 if (typeof globalThis.DOMMatrix === 'undefined') {
   // @ts-expect-error - Polyfill for Node.js
@@ -35,6 +88,14 @@ export async function POST(request: NextRequest) {
     let extractedText = '';
 
     if (file) {
+      // Check file size
+      if (file.size > MAX_FILE_SIZE) {
+        return NextResponse.json(
+          { error: 'File too large. Maximum size is 10MB.' },
+          { status: 400 }
+        );
+      }
+
       // Handle PDF file
       if (file.type === 'application/pdf') {
         const arrayBuffer = await file.arrayBuffer();
@@ -45,6 +106,15 @@ export async function POST(request: NextRequest) {
         extractedText = await file.text();
       }
     } else if (url) {
+      // Validate URL to prevent SSRF
+      const urlValidation = isValidExternalUrl(url);
+      if (!urlValidation.valid) {
+        return NextResponse.json(
+          { error: urlValidation.error || 'Invalid URL' },
+          { status: 400 }
+        );
+      }
+
       // Handle URL - fetch the page content
       try {
         // Use browser-like headers to avoid being blocked

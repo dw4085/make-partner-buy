@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Header } from '@/components/layout/Header';
 import { ProgressBar } from '@/components/layout/ProgressBar';
 import { useSession } from '@/context/SessionContext';
-import { FRAMEWORKS, ANIMATION } from '@/lib/constants';
+import { FRAMEWORKS, ANIMATION, MIN_FRAMEWORKS_REQUIRED } from '@/lib/constants';
 
 // Framework components
 import { CompetitionFramework } from '@/components/frameworks/CompetitionFramework';
@@ -84,7 +84,7 @@ export function FrameworksScreen() {
               </h1>
               <div className="w-16 h-1 bg-[#B4975A] rounded-full mx-auto mb-4" />
               <p className="text-muted-foreground max-w-lg mx-auto">
-                Work through these frameworks in any order. Complete at least 3 to see your results.
+                Work through these frameworks in any order. Complete at least {MIN_FRAMEWORKS_REQUIRED} to see your results.
               </p>
             </div>
 
@@ -148,9 +148,9 @@ export function FrameworksScreen() {
             <div className="text-center">
               <p className="text-muted-foreground mb-4">
                 {state.completedFrameworks.length} of {Object.keys(FRAMEWORKS).length} frameworks completed
-                {state.completedFrameworks.length < 3 && (
+                {state.completedFrameworks.length < MIN_FRAMEWORKS_REQUIRED && (
                   <span className="block text-sm mt-1">
-                    (Complete at least 3 to see results)
+                    (Complete at least {MIN_FRAMEWORKS_REQUIRED} to see results)
                   </span>
                 )}
               </p>

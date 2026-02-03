@@ -118,13 +118,16 @@ export const DECISIONS = {
 export const CONTENT_LIMITS = {
   scenario: {
     min: 100,
-    max: 3000,
+    max: 5000,
   },
   reasoning: {
-    min: 50,
+    min: 25,
     max: 500,
   },
 } as const;
+
+// Minimum frameworks required to see results
+export const MIN_FRAMEWORKS_REQUIRED = 4;
 
 // Animation variants for Framer Motion
 export const ANIMATION = {

@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Parse scenario error:', error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to parse scenario. Please try again with a different input.' },
+      { error: 'Failed to parse scenario. Please try again with a different input.' },
       { status: 500 }
     );
   }

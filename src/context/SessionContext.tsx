@@ -10,6 +10,7 @@ import type {
   FinalAnalysis,
   Decision,
 } from '@/types';
+import { MIN_FRAMEWORKS_REQUIRED } from '@/lib/constants';
 
 // Initial framework state
 const initialFrameworks: FrameworkResults = {
@@ -191,8 +192,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }, [state.frameworks, state.completedFrameworks]);
 
   const canProceedToResults = useCallback(() => {
-    // Require at least 3 frameworks to be completed
-    return state.completedFrameworks.length >= 3;
+    // Require at least MIN_FRAMEWORKS_REQUIRED frameworks to be completed
+    return state.completedFrameworks.length >= MIN_FRAMEWORKS_REQUIRED;
   }, [state.completedFrameworks]);
 
   const value: SessionContextType = {
