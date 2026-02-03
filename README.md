@@ -1,36 +1,134 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Make · Buy · Partner
+
+An interactive strategic decision analysis tool for MBA students, developed for Columbia Business School's Technology Strategy course.
+
+## Overview
+
+This tool guides students through a systematic analysis of make-buy-partner decisions using established strategic frameworks:
+
+1. **Competition-Driven Pressures** - 2x2 matrix of performance vs. cost pressures
+2. **Technology S-Curve** - Technology lifecycle positioning
+3. **Transaction Cost Economics** - Asset specificity, uncertainty, and frequency
+4. **Hold-Up Risk** - Dependency and lock-in assessment
+5. **Bargaining Power** - Negotiating position analysis
+6. **Additional Dimensions** - Time horizon, capability gap, optionality
+
+## Features
+
+- Mobile-friendly responsive design
+- AI-powered scenario parsing (Claude or OpenAI)
+- Interactive framework inputs with real-time visualizations
+- Personalized feedback comparing intuition vs. systematic analysis
+- Shareable results and downloadable summaries
+- Colorblind-accessible design
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+
+- npm or yarn
+
+### Installation
+
+```bash
+npm install
+```
+
+### Environment Setup
+
+Copy `.env.example` to `.env.local` and add your API keys:
+
+```bash
+cp .env.example .env.local
+```
+
+Configure your AI provider:
+
+```env
+# Use 'anthropic' (default) or 'openai'
+AI_PROVIDER=anthropic
+
+# Provide the appropriate API key
+ANTHROPIC_API_KEY=your_key_here
+# or
+OPENAI_API_KEY=your_key_here
+```
+
+### Development
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Production Build
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm start
+```
 
-## Learn More
+## Deployment
 
-To learn more about Next.js, take a look at the following resources:
+This app is configured for Vercel deployment:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Push to GitHub
+2. Connect repository to Vercel
+3. Add environment variables in Vercel dashboard
+4. Deploy
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Tech Stack
 
-## Deploy on Vercel
+- **Framework**: Next.js 14 (App Router)
+- **Styling**: Tailwind CSS + shadcn/ui
+- **Animation**: Framer Motion
+- **Charts**: Custom SVG, Recharts
+- **AI**: Vercel AI SDK (Claude/OpenAI)
+- **State**: React Context
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Project Structure
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+src/
+├── app/
+│   ├── api/           # API routes for AI interactions
+│   ├── globals.css    # Global styles and design tokens
+│   ├── layout.tsx     # Root layout with providers
+│   └── page.tsx       # Main app entry point
+├── components/
+│   ├── frameworks/    # Framework-specific components
+│   ├── layout/        # Header, ProgressBar
+│   ├── screens/       # Page-level screen components
+│   └── ui/            # shadcn/ui components
+├── context/           # React Context for session state
+├── lib/
+│   ├── ai/            # AI provider abstraction
+│   ├── constants.ts   # Design system constants
+│   └── utils.ts       # Utility functions
+└── types/             # TypeScript type definitions
+```
+
+## Design System
+
+- **Primary**: Columbia Blue (#1D4ED8)
+- **Secondary**: Warm Navy (#1E3A5F)
+- **Accent**: Gold (#B4975A)
+- **Make**: Teal (#0D9488)
+- **Buy**: Blue (#2563EB)
+- **Partner**: Orange (#C2410C)
+
+Typography:
+- Headlines: Libre Baskerville (serif)
+- Body: DM Sans (sans-serif)
+
+## Author
+
+Professor Dan Wang
+Columbia Business School
+Technology Strategy
+
+## License
+
+Educational use only. All rights reserved.
