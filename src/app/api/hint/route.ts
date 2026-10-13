@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { denyUnlessSignedIn } from '@/lib/auth';
 import { generateHint } from '@/lib/ai';
 
 export async function POST(request: NextRequest) {
+  const denied = await denyUnlessSignedIn();
+  if (denied) return denied;
+
   try {
     const { framework, scenario, inputs } = await request.json();
 

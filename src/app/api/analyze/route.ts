@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { denyUnlessSignedIn } from '@/lib/auth';
 import { analyzeResults } from '@/lib/ai';
 import type { FrameworkResults, Decision } from '@/types';
 
@@ -119,6 +120,9 @@ function calculateLocalAnalysis(frameworks: FrameworkResults) {
 }
 
 export async function POST(request: NextRequest) {
+  const denied = await denyUnlessSignedIn();
+  if (denied) return denied;
+
   try {
     const { scenario, stance, frameworks } = await request.json();
 

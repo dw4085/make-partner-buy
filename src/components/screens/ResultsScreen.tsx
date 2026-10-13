@@ -8,6 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Header } from '@/components/layout/Header';
 import { useSession } from '@/context/SessionContext';
 import { DECISIONS, ANIMATION } from '@/lib/constants';
+import { apiFetch } from '@/lib/api';
+import { reportAnalysis } from '@/lib/hubEvents';
 import type { Decision } from '@/types';
 
 export function ResultsScreen() {
@@ -23,7 +25,7 @@ export function ResultsScreen() {
       }
 
       try {
-        const response = await fetch('/api/analyze', {
+        const response = await apiFetch('/api/analyze', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -39,6 +41,16 @@ export function ResultsScreen() {
 
         const analysis = await response.json();
         setAnalysis(analysis);
+        reportAnalysis(
+          {
+            runId: state.runId,
+            scenario: state.scenario,
+            initialStance: state.initialStance,
+            frameworks: state.frameworks,
+            completedFrameworks: state.completedFrameworks,
+          },
+          analysis
+        );
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
@@ -47,7 +59,7 @@ export function ResultsScreen() {
     };
 
     fetchAnalysis();
-  }, [state.scenario, state.initialStance, state.frameworks, state.analysis, setAnalysis]);
+  }, [state.runId, state.scenario, state.initialStance, state.frameworks, state.completedFrameworks, state.analysis, setAnalysis]);
 
   if (isLoading) {
     return (

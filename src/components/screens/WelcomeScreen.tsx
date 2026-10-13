@@ -128,7 +128,7 @@ export function WelcomeScreen() {
           >
             <p className="text-[#1E3A5F] italic">
               <span className="font-semibold not-italic">Tip:</span> This tool is designed to help you
-              develop strategic intuition. There are no "wrong" answers — the goal is to compare your
+              develop strategic intuition. There are no &ldquo;wrong&rdquo; answers — the goal is to compare your
               initial instincts with what emerges from systematic analysis.
             </p>
           </motion.div>

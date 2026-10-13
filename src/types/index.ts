@@ -102,6 +102,7 @@ export interface FeedbackItem {
 // Session state
 export interface SessionState {
   step: AppStep;
+  runId: string | null; // one attempt per scenario, for the class hub's activity log
   scenario: Scenario | null;
   initialStance: InitialStance | null;
   frameworks: FrameworkResults;

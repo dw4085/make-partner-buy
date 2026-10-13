@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useReducer, useCallback, ReactNode } from 'react';
 import type { HintsState, FrameworkId, FrameworkHints, InputHintsResponse, Scenario } from '@/types';
 import { getFrameworkInputIds } from '@/lib/inputMetadata';
+import { apiFetch } from '@/lib/api';
 
 const FRAMEWORKS: FrameworkId[] = [
   'competition',
@@ -112,7 +113,7 @@ export function HintsProvider({ children }: { children: ReactNode }) {
     await Promise.all(
       FRAMEWORKS.map(async (framework) => {
         try {
-          const response = await fetch('/api/input-hints', {
+          const response = await apiFetch('/api/input-hints', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ framework, scenario }),

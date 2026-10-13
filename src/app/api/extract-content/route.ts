@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { denyUnlessSignedIn } from '@/lib/auth';
 
 // Maximum file size: 10MB
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -80,6 +81,9 @@ async function parsePDF(buffer: Buffer): Promise<string> {
 }
 
 export async function POST(request: NextRequest) {
+  const denied = await denyUnlessSignedIn();
+  if (denied) return denied;
+
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File | null;

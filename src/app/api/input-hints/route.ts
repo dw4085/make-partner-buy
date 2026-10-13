@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { denyUnlessSignedIn } from '@/lib/auth';
 import { generateInputHints } from '@/lib/ai';
 import type { FrameworkId } from '@/types';
 
@@ -12,6 +13,9 @@ const VALID_FRAMEWORKS: FrameworkId[] = [
 ];
 
 export async function POST(request: NextRequest) {
+  const denied = await denyUnlessSignedIn();
+  if (denied) return denied;
+
   try {
     const { framework, scenario } = await request.json();
 

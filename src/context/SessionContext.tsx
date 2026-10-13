@@ -54,6 +54,7 @@ const initialFrameworks: FrameworkResults = {
 // Initial session state
 const initialState: SessionState = {
   step: 'welcome',
+  runId: null,
   scenario: null,
   initialStance: null,
   frameworks: initialFrameworks,
@@ -64,7 +65,7 @@ const initialState: SessionState = {
 // Action types
 type SessionAction =
   | { type: 'SET_STEP'; payload: AppStep }
-  | { type: 'SET_SCENARIO'; payload: Scenario }
+  | { type: 'SET_SCENARIO'; payload: { scenario: Scenario; runId: string } }
   | { type: 'SET_INITIAL_STANCE'; payload: InitialStance }
   | { type: 'UPDATE_FRAMEWORK'; payload: { framework: keyof FrameworkResults; data: Partial<FrameworkResults[keyof FrameworkResults]> } }
   | { type: 'COMPLETE_FRAMEWORK'; payload: keyof FrameworkResults }
@@ -78,7 +79,7 @@ function sessionReducer(state: SessionState, action: SessionAction): SessionStat
       return { ...state, step: action.payload };
 
     case 'SET_SCENARIO':
-      return { ...state, scenario: action.payload };
+      return { ...state, scenario: action.payload.scenario, runId: action.payload.runId };
 
     case 'SET_INITIAL_STANCE':
       return { ...state, initialStance: action.payload };
@@ -156,7 +157,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const setScenario = useCallback((scenario: Scenario) => {
-    dispatch({ type: 'SET_SCENARIO', payload: scenario });
+    // Each scenario is a new attempt (run) in the class hub's activity log.
+    dispatch({ type: 'SET_SCENARIO', payload: { scenario, runId: crypto.randomUUID() } });
   }, []);
 
   const setInitialStance = useCallback((decision: Decision, reasoning: string, confidence: number) => {

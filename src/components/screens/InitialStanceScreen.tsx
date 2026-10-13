@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Header } from '@/components/layout/Header';
 import { useSession } from '@/context/SessionContext';
 import { DECISIONS, CONTENT_LIMITS, ANIMATION } from '@/lib/constants';
+import { reportStanceLocked } from '@/lib/hubEvents';
 import type { Decision } from '@/types';
 
 const DECISION_ICONS = {
@@ -31,6 +32,9 @@ export function InitialStanceScreen() {
     if (!selectedDecision || !isValidReasoning) return;
     setIsLocked(true);
     setInitialStance(selectedDecision, reasoning, 3); // Default confidence of 3
+    if (state.runId && state.scenario) {
+      reportStanceLocked(state.runId, state.scenario, { decision: selectedDecision, reasoning });
+    }
     setStep('frameworks');
   };
 

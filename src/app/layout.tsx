@@ -3,6 +3,7 @@ import { DM_Sans, Libre_Baskerville } from "next/font/google";
 import { SessionProvider } from "@/context/SessionContext";
 import { HintsProvider } from "@/context/HintsContext";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { HubInit } from "@/components/HubInit";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -46,6 +47,7 @@ export default function RootLayout({
           Skip to main content
         </a>
 
+        <HubInit />
         <HintsProvider>
           <SessionProvider>
             <TooltipProvider delayDuration={300}>

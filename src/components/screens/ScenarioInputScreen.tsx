@@ -11,6 +11,7 @@ import { Header } from '@/components/layout/Header';
 import { useSession } from '@/context/SessionContext';
 import { CONTENT_LIMITS, ANIMATION } from '@/lib/constants';
 import { RIVIAN_EXAMPLE_SCENARIO } from '@/lib/ai/prompts';
+import { apiFetch } from '@/lib/api';
 
 export function ScenarioInputScreen() {
   const { setStep, setScenario } = useSession();
@@ -61,7 +62,7 @@ export function ScenarioInputScreen() {
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await fetch('/api/extract-content', {
+      const response = await apiFetch('/api/extract-content', {
         method: 'POST',
         body: formData,
       });
@@ -100,7 +101,7 @@ export function ScenarioInputScreen() {
       const formData = new FormData();
       formData.append('url', urlInput);
 
-      const response = await fetch('/api/extract-content', {
+      const response = await apiFetch('/api/extract-content', {
         method: 'POST',
         body: formData,
       });
@@ -141,7 +142,7 @@ export function ScenarioInputScreen() {
         return;
       }
 
-      const response = await fetch('/api/parse-scenario', {
+      const response = await apiFetch('/api/parse-scenario', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

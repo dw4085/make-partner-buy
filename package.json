@@ -16,6 +16,7 @@
     "clsx": "^2.1.1",
     "framer-motion": "^12.30.0",
     "html2canvas": "^1.4.1",
+    "jose": "^6.2.12",
     "jspdf": "^4.1.0",
     "lucide-react": "^0.563.0",
     "next": "16.1.6",

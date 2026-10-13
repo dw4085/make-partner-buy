@@ -8,6 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Header } from '@/components/layout/Header';
 import { useSession } from '@/context/SessionContext';
 import { ANIMATION } from '@/lib/constants';
+import { apiFetch } from '@/lib/api';
+import { reportFeedback } from '@/lib/hubEvents';
 import type { FeedbackItem } from '@/types';
 
 export function ReflectionScreen() {
@@ -24,7 +26,7 @@ export function ReflectionScreen() {
 
       setIsLoadingFeedback(true);
       try {
-        const response = await fetch('/api/feedback', {
+        const response = await apiFetch('/api/feedback', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -37,6 +39,16 @@ export function ReflectionScreen() {
         if (response.ok) {
           const feedback = await response.json();
           setAnalysis({ ...analysis, feedback });
+          reportFeedback(
+            {
+              runId: state.runId,
+              scenario: state.scenario,
+              initialStance: state.initialStance,
+              frameworks: state.frameworks,
+              completedFrameworks: state.completedFrameworks,
+            },
+            { ...analysis, feedback }
+          );
         }
       } catch (error) {
         console.error('Failed to fetch feedback:', error);
@@ -46,7 +58,7 @@ export function ReflectionScreen() {
     };
 
     fetchFeedback();
-  }, [analysis, state.scenario, state.initialStance, setAnalysis]);
+  }, [analysis, state.runId, state.scenario, state.initialStance, state.frameworks, state.completedFrameworks, setAnalysis]);
 
   const handleShare = async () => {
     // Create shareable state

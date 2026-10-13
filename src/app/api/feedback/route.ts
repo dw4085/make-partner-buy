@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { denyUnlessSignedIn } from '@/lib/auth';
 import { provideFeedback } from '@/lib/ai';
 import type { FeedbackItem, Decision } from '@/types';
 
@@ -46,6 +47,9 @@ function generateLocalFeedback(
 }
 
 export async function POST(request: NextRequest) {
+  const denied = await denyUnlessSignedIn();
+  if (denied) return denied;
+
   try {
     const { scenario, stance, analysis } = await request.json();
 
