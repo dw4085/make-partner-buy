@@ -1,13 +1,6 @@
 // Class hub kit for browser-only apps (no server of their own, e.g. Vite calculators).
 // Copy into the app (e.g. src/lib/hub.ts). No dependencies. Call initHub() once at startup.
 //
-// In this app (Next.js, not Vite): src/lib/hubEvents.ts passes the config to
-// initHub({ hubUrl, appSlug }) explicitly from NEXT_PUBLIC_HUB_URL / NEXT_PUBLIC_HUB_APP_SLUG.
-// One fix to the kit: flush() yields before its first read (`await Promise.resolve()`). Without it,
-// a flush that finds nothing to send (initHub's, on a first visit) finished synchronously, cleared
-// `flushing` before it was assigned, and left it set for good, so no later report was sent until
-// the next page visit.
-//
 // Build-time config (Vite): VITE_HUB_URL (e.g. https://preview.cbs-tech-strategy.com) and
 // VITE_HUB_APP_SLUG. The app must be served under the hub's cookie domain
 // (e.g. twitch.preview.cbs-tech-strategy.com) so the browser sends the hub its session cookie.
@@ -74,8 +67,10 @@ export function initHub(options: { hubUrl?: string; appSlug?: string } = {}) {
   const appSlug = options.appSlug ?? env.VITE_HUB_APP_SLUG ?? '';
   if (!hubUrl || !appSlug) throw new Error('Set VITE_HUB_URL and VITE_HUB_APP_SLUG');
   cfg = { hubUrl, appSlug };
+  // Leaving the page: queue any pending idle snapshot without starting a normal send (which the
+  // browser would cancel), then send everything with keepalive so it survives the unload.
   const sendPending = () => {
-    flushIdle();
+    flushIdle(false);
     void flush(true);
   };
   window.addEventListener('pagehide', sendPending);
@@ -115,6 +110,11 @@ export async function requireUser(): Promise<HubUser> {
 
 // Report an event (held until the hub has it).
 export function logEvent(e: HubEvent): void {
+  enqueue(e);
+  void flush();
+}
+
+function enqueue(e: HubEvent): void {
   const items = readOutbox();
   items.push({
     app_slug: config().appSlug,
@@ -127,17 +127,17 @@ export function logEvent(e: HubEvent): void {
     event_key: crypto.randomUUID(),
   });
   writeOutbox(items);
-  void flush();
 }
 
 let flushing: Promise<void> | null = null;
 
 // Send everything held, oldest first. Never throws.
 export function flush(keepalive = false): Promise<void> {
-  if (flushing) return flushing;
-  flushing = (async () => {
-    await Promise.resolve(); // so `finally` below runs after `flushing` is assigned
-    try {
+  // A keepalive send (page unloading) doesn't wait for one in flight, which the browser may cancel;
+  // anything sent twice is recorded once (event_key).
+  if (flushing && !keepalive) return flushing;
+  const run = (async () => {
+    {
       for (let round = 0; round < 5; round++) {
         const items = readOutbox();
         if (!items.length) return;
@@ -163,10 +163,13 @@ export function flush(keepalive = false): Promise<void> {
         }
         if (batch.length < BATCH) return;
       }
-    } finally {
-      flushing = null;
     }
   })();
+  // Cleared in a .finally() (which always runs later), not inside the async function: when there
+  // is nothing to send it returns synchronously, before `flushing` would have been assigned.
+  flushing = run.finally(() => {
+    flushing = null;
+  });
   return flushing;
 }
 
@@ -181,10 +184,10 @@ let lastIdleSnapshot = '';
 export function logWhenIdle(build: () => HubEvent, delayMs = 20_000): void {
   idleBuild = build;
   if (idleTimer) clearTimeout(idleTimer);
-  idleTimer = setTimeout(flushIdle, delayMs);
+  idleTimer = setTimeout(() => flushIdle(), delayMs);
 }
 
-function flushIdle() {
+function flushIdle(send = true) {
   if (idleTimer) clearTimeout(idleTimer);
   idleTimer = null;
   if (!idleBuild) return;
@@ -193,5 +196,6 @@ function flushIdle() {
   const key = JSON.stringify([event.type, event.title, event.snapshot]);
   if (key === lastIdleSnapshot) return;
   lastIdleSnapshot = key;
-  logEvent(event);
+  if (send) logEvent(event);
+  else enqueue(event);
 }
